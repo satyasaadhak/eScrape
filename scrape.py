@@ -1,5 +1,5 @@
 import urllib3
-from bs4 import BeatifulSoup
+from bs4 import BeautifulSoup
 
 links = [
   "https://www.ebay.com/itm/Womens-skirt-Casual-Retro-High-Waist-Evening-Party-Short/352660604356",
@@ -429,6 +429,15 @@ links = [
   "https://www.ebay.com/itm/Gaming-Headset-Headphones-With-Microphone/352660603465"
 ]
 
+descLinks = list()
+
+http = urllib3.PoolManager()
 for link in links:
-  document = urllib.request.urlopen(link, None, 2.5)
-  print(document)
+  document = http.request('GET', link).data
+  soup = BeautifulSoup(document, 'html.parser')
+  descLink = soup.find_all('iframe')
+  
+  if descLink:
+    descLinks.append(descLink[0].attrs['src'])
+
+print(descLinks)
