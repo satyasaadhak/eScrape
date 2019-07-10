@@ -439,5 +439,9 @@ for link in links:
   
   if descLink:
     descLinks.append(descLink[0].attrs['src'])
+    descMarkup = http.request('GET', descLink[0].attrs['src'])
+    soupDesc   = BeautifulSoup(descMarkup, 'html.parser')
+    body       = soupDesc.find_all('body')
+    print(soupDesc)
 
-print(descLinks)
+print(descLinks.__len__())
