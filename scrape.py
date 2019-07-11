@@ -1,4 +1,5 @@
 import urllib3
+import re
 from bs4 import BeautifulSoup
 
 links = [
@@ -435,13 +436,13 @@ http = urllib3.PoolManager()
 for link in links:
   document = http.request('GET', link).data
   soup = BeautifulSoup(document, 'html.parser')
+  itemSpecifics = soup.select_one('.itemAttr').find_all('tr')
+  print(itemSpecifics)
   descLink = soup.find_all('iframe')
   
   if descLink:
     descLinks.append(descLink[0].attrs['src'])
     descMarkup = http.request('GET', descLink[0].attrs['src']).data
     soupDesc   = BeautifulSoup(descMarkup, 'html.parser')
-    body       = soupDesc.select('#ds_div')[0]
+    body       = soupDesc.select_one('#ds_div').contents[1].contents[1].find_all('span')
     print(body)
-
-print(descLinks.__len__())
