@@ -440,19 +440,29 @@ for link in links:
   start         = nameElement.find('</span>') + 7
   end           = nameElement.find('</h1>')
   name          = nameElement[start:end].strip()
-  itemSpecifics = soup.select_one('.itemAttr').find_all('td')
-  condition     = itemSpecifics[1].text.strip().replace('\n', '').replace('\t', '').replace('See all condition definitions- opens in a new window or tab... Read moreabout the condition', '')
-  brand         = itemSpecifics[3].text.strip()
-  style         = itemSpecifics[5].text.strip()
-  size_type     = itemSpecifics[7].text.strip()
   productsDescription[name] = dict()
   productsDescription[name]['link'] = link
-  productsDescription[name]['itemSpecifics'] = {
-    "Condition": condition,
-    "Brand": brand,
-    "style": style,
-    "Size Type": size_type
-  }
+  productsDescription[name]['itemSpecifics'] = dict()
+  item          = soup.select_one('.itemAttr')
+  # print(item)
+  if item:
+    itemSpecifics = item.find_all('td')
+    itemLength    = len(itemSpecifics)
+    if 1 <= itemLength:
+      condition     = itemSpecifics[1].text.strip().replace('\n', '').replace('\t', '').replace('See all condition definitions- opens in a new window or tab... Read moreabout the condition', '')
+    if 3 <= itemLength:
+      brand         = itemSpecifics[3].text.strip()
+    if 5 <= itemLength:
+      style         = itemSpecifics[5].text.strip()
+    if 7 <= itemLength:
+      size_type     = itemSpecifics[7].text.strip()
+    productsDescription[name]['itemSpecifics'] = {
+      "Condition": condition,
+      "Brand": brand,
+      "style": style,
+      "Size Type": size_type
+    }
+    # print(productsDescription)
   productsDescription[name]['description'] = dict()
   descLink = soup.find_all('iframe')
   
@@ -462,14 +472,15 @@ for link in links:
     soupDesc   = BeautifulSoup(descMarkup, 'html.parser')
     body       = soupDesc.select_one('#ds_div').find_all('span')
 
-    for description in body:
-      key = description.find('strong').string.replace(':', '')
-      value = str(description.extract())
-      start = value.find('</strong>') + 9
-      end   = value.find('</span>')
-      desc  = value[start:end].strip()
-      productsDescription[name]['description'][key] = desc
-
+    if body:
+      for description in body:
+        key   = description.find('strong').string.replace(':', '')
+        value = str(description.extract())
+        start = value.find('</strong>') + 9
+        end   = value.find('</span>')
+        desc  = value[start:end].strip()
+        productsDescription[name]['description'][key] = desc
+print(len(productsDescription))
 file = open('description.json', 'w')
 with file as writer:
   json.dump(productsDescription, writer)
